@@ -56,6 +56,7 @@ aiOffsetTimer = 0 -- Timer to control the offset
 --[[
     Runs when the game first starts up, only once; used to initialize the game.
 ]]
+isPaused = false -- Flag to check if the game is paused
 function love.load()
     -- set love's default filter to "nearest-neighbor", which essentially
     -- means there will be no filtering of pixels (blurriness), which is
@@ -120,6 +121,7 @@ end
     since the last frame, which LÖVE2D supplies us.
 ]]
 function love.update(dt)
+    if isPaused then return end -- If the game is paused, skip the update
     if gameState == 'serve' then
         -- before switching to play, initialize ball's velocity based
         -- on player who last scored
@@ -219,7 +221,7 @@ function love.update(dt)
     -- player 2 is now AI
     -- AI movement (center vs center)
     aiOffsetTimer = aiOffsetTimer + dt
-    if aiOffsetTimer > 0.5 then
+    if aiOffsetTimer > 0.8 then
         aiOffset = math.random(-15,15)
         aiOffsetTimer = 0
     end
@@ -254,11 +256,12 @@ end
     passes in the key we pressed so we can access.
 ]]
 function love.keypressed(key)
-
-    if key == 'escape' then
-        love.event.quit()
     -- if we press enter during either the start or serve phase, it should
     -- transition to the next appropriate state
+    if key == 'escape' and gameState == 'play' then
+        isPaused = not isPaused
+    elseif key == 'q' then
+        love.event.quit() -- quit the game if we press 'q'
     elseif key == 'enter' or key == 'return' then
         if gameState == 'start' then
             gameState = 'serve'
